@@ -3,7 +3,8 @@
 VAGRANTFILE_API_VERSION = "2"
 
 unless Vagrant.has_plugin?("vagrant-hostmanager")
-  raise 'vagrant-hostmanager plugin is required'
+  system("vagrant plugin install vagrant-hostmanager") || exit!
+  exit system('vagrant', *ARGV)
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
