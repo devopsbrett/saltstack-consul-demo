@@ -2,9 +2,15 @@
 # vi: set ft=ruby :
 VAGRANTFILE_API_VERSION = "2"
 
-unless Vagrant.has_plugin?("vagrant-hostmanager")
-  system("vagrant plugin install vagrant-hostmanager") || exit!
-  exit system('vagrant', *ARGV)
+required_plugins = ["vagrant-hosts", "vagrant-hostmanager"]
+required_plugins.each do |plugin|
+  unless Vagrant.has_plugin?(plugin)
+    # Attempt to install plugin. Bail out on failure to prevent an infinite loop.
+    system("vagrant plugin install #{plugin}") || exit!
+
+    # Relaunch Vagrant so the plugin is detected. Exit with the same status code.
+    exit system('vagrant', *ARGV)
+  end
 end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
