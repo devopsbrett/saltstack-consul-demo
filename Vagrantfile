@@ -16,8 +16,8 @@ end
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provider "virtualbox" do |vbox, override|
-    override.vm.box = "ubuntu/trusty64"
-    vbox.memory = 1024
+    override.vm.box = "debian/jessie64"
+    vbox.memory = 700
     vbox.cpus = 2
 
     # Enable multiple guest CPUs if available
@@ -35,7 +35,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     master.vm.provision "shell", inline: <<-SHELL
       sed -i '/127.0.1.1/d' /etc/hosts
       curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh
-      sh /tmp/install_salt.sh -M -P git v2015.8.0
+      sh /tmp/install_salt.sh -M -P git v2016.11.3
     SHELL
   end
 
@@ -51,7 +51,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       node.vm.provision "shell", inline: <<-SHELL
         sed -i '/127.0.1.1/d' /etc/hosts
         curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh
-        sh /tmp/install_salt.sh -P git v2015.8.0
+	sh /tmp/install_salt.sh -P git v2016.11.3
       SHELL
     end
   end
