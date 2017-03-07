@@ -12,31 +12,39 @@ consul_prereq:
     - watch:
       - file: /tmp/install_consul.sh
 
-/etc/consul:
+/etc/consul.d:
   file.directory:
     - user: root
     - group: root
     - dir_mode: 755
 
-/etc/consul/config.json:
+/etc/consul.d/config.json:
   file.managed:
     - source: salt://consul/consul.config
+    - template: jinja
     - require:
-      - file: /etc/consul
+      - file: /etc/consul.d
+    - defaults:
+        addr: {{ grains['ip4_interfaces']['eth1'][0] }}
 
-/etc/init/consul.conf:
+/etc/default/consul:
+  file.managed:
+    - source: salt://consul/consul.default
+
+/etc/systemd/system/consul.service:
   file.managed:
     - source: salt://consul/consul.service
     - require:
       - cmd: /tmp/install_consul.sh
-      - file: /etc/consul/config.json
+      - file: /etc/consul.d/config.json
+      - file: /etc/default/consul
 
 consul:
   service.running:
     - enable: True
     - reload: True
     - watch:
-      - file: /etc/consul/config.json
+      - file: /etc/consul.d/config.json
       - cmd: /tmp/install_consul.sh
 
 python-pip:
