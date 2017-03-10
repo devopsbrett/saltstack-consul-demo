@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 VAGRANTFILE_API_VERSION = "2"
 
-required_plugins = ["vagrant-hosts", "vagrant-hostmanager"]
+required_plugins = ["vagrant-hosts", "vagrant-hostmanager", "vagrant-vbguest"]
 required_plugins.each do |plugin|
   unless Vagrant.has_plugin?(plugin)
     # Attempt to install plugin. Bail out on failure to prevent an infinite loop.
@@ -16,12 +16,19 @@ end
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.provider "virtualbox" do |vbox, override|
-    override.vm.box = "ubuntu/trusty64"
+    # Enable multiple guest CPUs if available
+    override.vm.box = "debian/jessie64"
     vbox.memory = 1024
     vbox.cpus = 2
-
-    # Enable multiple guest CPUs if available
     vbox.customize ["modifyvm", :id, "--ioapic", "on"]
+  end
+
+  config.vm.provider "libvirt" do |lv, override|
+    # Enable multiple guest CPUs if available
+    override.vm.box = "debian/jessie64"
+    lv.memory = 1024
+    lv.cpus = 2
+    #lv.customize ["modifyvm", :id, "--ioapic", "on"]
   end
 
   config.vm.define "master" do |master|
@@ -34,8 +41,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     master.vm.provision "shell", inline: <<-SHELL
       sed -i '/127.0.1.1/d' /etc/hosts
+      apt-get install -y curl
       curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh
-      sh /tmp/install_salt.sh -M -P git v2015.8.0
+      sh /tmp/install_salt.sh -M -P git v2016.11.3
     SHELL
   end
 
@@ -50,8 +58,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       end
       node.vm.provision "shell", inline: <<-SHELL
         sed -i '/127.0.1.1/d' /etc/hosts
+        apt-get install -y curl
         curl -L https://bootstrap.saltstack.com -o /tmp/install_salt.sh
-        sh /tmp/install_salt.sh -P git v2015.8.0
+        sh /tmp/install_salt.sh -P git v2016.11.3
       SHELL
     end
   end
